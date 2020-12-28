@@ -5,6 +5,7 @@ Change Log
 ==========
 
 - [Unreleased (development version)](#unreleased-development-branch)
+  - [Geometric stiffness for Euler beams](#geometric-stiffness-for-euler-beams)
   - [New Chrono::Synchrono module](#added-new-chronosynchrono-module)
   - [Rename Intel MKL Pardiso interface module](#changed-rename-intel-mkl-pardiso-interface-module)
   - [Saving POV-Ray files from Irrlicht interactive view](#added-saving-pov-ray-files-from-irrlicht-interactive-view)
@@ -27,6 +28,13 @@ Change Log
 - [Release 4.0.0](#release-400---2019-02-22)
 
 ## Unreleased (development branch)
+
+### [Added] Geometric stiffness for Euler beams
+
+The geometric stiffness term is now introduced also for the chrono::ChElementBeamEuler beam element (Euler-Bernoulli corotational beams). It is turned on by default, and it is computed via an analytical expression, with minimal cpu overhead. 
+Note that geometric stiffness was already considered in IGA and ANCF beams, only the Euler beam was missing. Geometric stiffness is responsible of the fact that if you pull a thin beam like a string, its natural frequencies will increase, or viceversa, if you push it, its lateral stiffness decreases up to buckling instability. 
+Note that Euler beams ware able to simulate buckling or pulled-string stiffening even before, but only doing time integration in multiple time steps: instead, if one exported the M,K matrices for doing modal analysis of a pre-stretched Euler beam after a static analysis, the K matrix was missing the contribution of the geometric stiffness hence frequencies were uncorrect only in modal analysis.
+
 
 ### [Added] New Chrono::Synchrono module
 
@@ -93,7 +101,26 @@ for (auto& axle : trailer.GetAxles()) {
 
 ### [Changed] Enhancements to Chrono::FSI
 
-TODO
+- The WCSPH based explicit solver now supports both fluid dynamics and granular material dynamics.
+
+	- The fluid dynamics is executed by default.
+	- The granular material dynamics is executed by setting an "Elastic SPH" option in the input JSON file.
+
+- Add a consistent SPH discretization into the explicit SPH solver.
+
+	- Both the gradient and Laplacian operators in the NS equations are discretized by a consistent format.
+	- The correction matrices are calculated for both operators to enhance the consistency.
+	- A second-order accuracy will be recovered by this consistent discretization.
+
+- Add a new particle shifting technique into Chrono::FSI.
+
+	- The particle shifting strategy is a penetration-based particle shifting technique.
+	- It supports three-dimensional fluid/granular material dynamics problems with a free surface.
+
+- Make the granular material solver more stable and accurate in the framework of WCSPH.
+
+	- The Drucker-Prager yield criterion is implemented in conjunction with a four-step update strategy for the stress tensor of the granular material.
+	- The interaction between a rigid multibody system and granular material is supported.
 
 ### [Added] New Chrono::Sensor module
 
